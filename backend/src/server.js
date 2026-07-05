@@ -15,8 +15,10 @@ import { handleContestSockets } from './sockets/contest.socket.js'; // <-- 3. Im
 import contestRoutes from './routes/contest.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import { protectSocket } from './middlewares/auth.middleware.js';
+import helmet from 'helmet';
 
 const app = express();
+app.use(helmet());
 const PORT = process.env.PORT || 5000;
 
 connectDB();
