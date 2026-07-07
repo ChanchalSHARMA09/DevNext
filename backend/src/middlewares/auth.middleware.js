@@ -20,7 +20,9 @@ export const protectRoute = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
         // Fetch user from DB and attach to req.user (excluding password)
-        req.user = await User.findById(decoded.id);
+        const targetId = decoded.id || decoded._id;
+        req.user = await User.findById(targetId);
+
         if (!req.user) {
             return res.status(401).json({ success: false, message: "User belonging to token no longer exists." });
         }
@@ -35,24 +37,43 @@ export const protectRoute = async (req, res, next) => {
 // 2. Protect Real-Time WebSockets (Socket.io Handshake Guard)
 export const protectSocket = async (socket, next) => {
     try {
-        // Look for token passed in socket connection handshake
-        const token = socket.handshake.auth?.token;
-        if (!token) {
+        // 1. Grab token from auth payload OR authorization headers as fallback
+        let token = socket.handshake.auth?.token || socket.handshake.headers?.authorization;
+
+        if (!token || token === 'undefined' || token === 'null') {
             return next(new Error("Authentication error: No token provided."));
         }
 
-        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        const user = await User.findById(decoded.id);
-
-        if (!user) {
-            return next(new Error("Authentication error: User not found."));
+        // 2. Strip 'Bearer ' if it accidentally got attached to the socket token
+        if (token.startsWith('Bearer ')) {
+            token = token.split(' ')[1];
         }
 
-        // Attach verified profile details directly to the socket connection object
+        // 3. Verify cryptographic signature
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+        // 4. Bulletproof ID extraction: handles ._id, .id, or .userId automatically
+        const targetId = decoded._id || decoded.id || decoded.userId;
+
+        if (!targetId) {
+            return next(new Error("Authentication error: Malformed JWT payload structure."));
+        }
+
+        // 5. Look up user by valid ObjectId
+        const user = await User.findById(targetId);
+
+        if (!user) {
+            return next(new Error("Authentication error: User no longer exists in database."));
+        }
+
+        // 6. Bind user details cleanly to the live socket connection
         socket.user = user;
         socket.username = user.username;
-        next();
+        
+        next(); // Handshake authorized!
     } catch (error) {
+        // Log the exact internal failure to your backend terminal so you never have to guess again
+        console.error("Socket Handshake Rejection Details:", error.message);
         return next(new Error("Authentication error: Invalid token."));
     }
 };

@@ -20,7 +20,7 @@ const ContestSchema = new mongoose.Schema({
         correctAnswer: { type: String, required: true },
         points: { type: Number, required: true },
         difficulty: { type: String, enum: ['Easy', 'Medium', 'Hard'], default: 'Easy' },
-        timeLimitSeconds: { type: Number, default: 30 }
+        timeLimitSeconds: { type: Number, default: 60 }
     }],
     createdAt: { type: Date, default: Date.now }
 });

@@ -4,6 +4,7 @@ dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 import 'dotenv/config'; 
 import express from 'express';
+import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import http from 'http';               // <-- 1. Import native HTTP
 import { Server } from 'socket.io';    // <-- 2. Import Socket.io Server
@@ -27,8 +28,9 @@ const httpServer = http.createServer(app);
 // 5. Initialize Socket.io with CORS allowed for local frontend development
 const io = new Server(httpServer, {
     cors: {
-        origin: "*", // In production, we restrict this to your exact React domain
-        methods: ["GET", "POST"]
+        origin: 'http://localhost:5173', // Must match Vite's exact frontend URL
+        methods: ['GET', 'POST'],
+        credentials: true                // Required for cookies/auth tokens during handshake!
     }
 });
 
@@ -36,10 +38,14 @@ const io = new Server(httpServer, {
 app.set('io', io);
 
 // Attach Express Middleware & Routes
+app.use(cors({
+    origin: 'http://localhost:5173', // Vite's exact address
+    credentials: true                // Essential for sending HTTP-Only refresh cookies!
+}));
 app.use(express.json());
 app.use(cookieParser());
 app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/analyze', analysisRoutes);
+app.use('/api/v1/analysis', analysisRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/quiz', quizRoutes);
 app.use('/api/v1/contest', contestRoutes);
