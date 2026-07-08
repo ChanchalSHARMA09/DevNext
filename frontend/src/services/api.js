@@ -26,19 +26,15 @@ api.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
-                // Request a fresh token from backend
-                const response = await axios.post(
-                    'http://localhost:5000/api/v1/auth/refresh',
-                    {},
-                    { withCredentials: true }
-                );
+                // Call the refresh endpoint (relies on HTTP-only cookie)
+                const refreshResponse = await axios.post('/auth/refresh', {}, { withCredentials: true });
+                
+                const newAccessToken = refreshResponse.data.accessToken;
+                localStorage.setItem('accessToken', newAccessToken);
 
-                const { accessToken } = response.data;
-                localStorage.setItem('accessToken', accessToken);
-
-                // Update authorization header and retry original failed request
-                originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-                return axios(originalRequest);
+                // Update the failed request with the new token and retry it
+                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                return api(originalRequest);
             } catch (refreshError) {
                 // Refresh failed (user logged out or 2-day token expired)
                 localStorage.removeItem('accessToken');

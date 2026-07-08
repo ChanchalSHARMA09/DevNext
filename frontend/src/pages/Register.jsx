@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Lock, UserPlus, AlertCircle } from 'lucide-react';
+import { User, Mail, Lock, UserPlus, AlertCircle, MailCheck } from 'lucide-react';
 
 export default function Register() {
     const [username, setUsername] = useState('');
@@ -10,6 +10,7 @@ export default function Register() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(false); // 🔥 NEW: Tracks successful submission
 
     const { register } = useAuth();
     const navigate = useNavigate();
@@ -21,13 +22,42 @@ export default function Register() {
 
         try {
             await register(username, email, password);
-            navigate('/dashboard');
+            setIsSubmitted(true); // 🔥 Switch UI to "Check Email" state instead of navigating
         } catch (err) {
             setError(err.response?.data?.message || 'Registration failed. Please try again.');
         } finally {
             setIsSubmitting(false);
         }
     };
+
+    // 🔥 NEW: Success Screen when email verification is sent
+    if (isSubmitted) {
+        return (
+            <div className="flex min-h-screen items-center justify-center bg-slate-950 p-4">
+                <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/50 p-10 shadow-2xl backdrop-blur-xl text-center space-y-5">
+                    <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-indigo-500/10 border border-indigo-500/20">
+                        <MailCheck className="h-10 w-10 text-indigo-400" />
+                    </div>
+                    <h2 className="text-2xl font-bold tracking-tight text-white">Check your Inbox</h2>
+                    <p className="text-sm text-slate-400 leading-relaxed">
+                        We've sent a verification link to <br/>
+                        <span className="text-white font-semibold">{email}</span>
+                    </p>
+                    <p className="text-xs text-slate-500">
+                        Please click the link in the email to activate your account and enter the arena.
+                    </p>
+                    <div className="pt-4">
+                        <Link 
+                            to="/login"
+                            className="inline-block w-full rounded-xl bg-slate-800 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-slate-700"
+                        >
+                            Return to Login
+                        </Link>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-slate-950 p-4">

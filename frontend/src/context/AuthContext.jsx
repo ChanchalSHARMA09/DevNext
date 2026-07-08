@@ -68,13 +68,12 @@ export const AuthProvider = ({ children }) => {
 
     // 2. Register Function
     const register = async (username, email, password) => {
+        // 1. Make the API call to create the account and trigger the verification email
         const response = await api.post('/auth/register', { username, email, password });
-        const { accessToken, user: newUser } = response.data;
         
-        localStorage.setItem('accessToken', accessToken);
-        setUser(newUser);
-        connectSocket(accessToken); // Spin up authenticated socket
-        return newUser;
+        // 2. We DO NOT log them in, set localStorage, or connect sockets here anymore. 
+        // They must verify their email first, then log in normally.
+        return response.data;
     };
 
     // 3. Login Function

@@ -30,12 +30,25 @@ const UserSchema = new mongoose.Schema({
         type: String,
         select: false // Keep it hidden from general database queries!
     },
+    
+    // 🔥 NEW: Fields for Email Verification
+    isEmailVerified: {
+        type: Boolean,
+        default: false
+    },
+    verificationToken: String,
+    verificationTokenExpire: Date,
+
+    // 🔥 NEW: Fields for Password Reset
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
+
     createdAt: { type: Date, default: Date.now }
 });
 
 // Automatically hash password before saving a new or updated user
 UserSchema.pre('save', async function() {
-    if (!this.isModified('password')) return;
+    if (!this.isModified('password')) return; // No next() needed here!
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
 });
