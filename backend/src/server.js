@@ -16,6 +16,7 @@ import { handleContestSockets } from './sockets/contest.socket.js';
 import contestRoutes from './routes/contest.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import { protectSocket } from './middlewares/auth.middleware.js';
+import helmet from 'helmet';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -59,6 +60,7 @@ app.use(cors({
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(helmet());
 
 // Routes
 app.use('/api/v1/auth', authRoutes);
