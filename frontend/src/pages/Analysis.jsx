@@ -1,4 +1,3 @@
-// src/pages/Analysis.jsx
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -15,17 +14,12 @@ import {
 
 export default function Analysis() {
     const { user } = useAuth();
-    
-    // Form Inputs State
     const [code, setCode] = useState('// Paste your code here to inspect optimization potential...\n\nfunction calculateTotal(items) {\n    let total = 0;\n    for(let i=0; i<items.length; i++) {\n        total += items[i].price;\n    }\n    return total;\n}');
     const [language, setLanguage] = useState('javascript');
-    
-    // Execution States
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [feedback, setFeedback] = useState(null);
     const [error, setError] = useState(null);
 
-    // Trigger API Endpoint Request
     const handleAnalyzeCode = async () => {
         if (!code.trim() || isAnalyzing) return;
 
@@ -34,15 +28,13 @@ export default function Analysis() {
         setFeedback(null);
 
         try {
-            // Targets your exact controller parameters: POST /api/v1/analysis/analyze
             const response = await api.post('/analysis/analyze', {
                 code,
                 language,
-                userId: user?.id || user?._id || null // Safely relays active credentials
+                userId: user?.id || user?._id || null
             });
 
             if (response.data?.success) {
-                // Save the data payload mapping to the Analysis mongoose structure
                 setFeedback(response.data.data.aiFeedback);
             }
         } catch (err) {
@@ -53,7 +45,6 @@ export default function Analysis() {
         }
     };
 
-    // Helper to color-code score badges dynamically
     const getScoreColor = (score) => {
         if (score >= 80) return { text: 'text-emerald-400', border: 'border-emerald-500/30', bg: 'bg-emerald-500/10' };
         if (score >= 50) return { text: 'text-amber-400', border: 'border-amber-500/30', bg: 'bg-amber-500/10' };

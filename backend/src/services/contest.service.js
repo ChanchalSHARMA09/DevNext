@@ -1,11 +1,10 @@
-// src/services/contest.service.js
 import { ChatGroq } from "@langchain/groq";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { contestGeneratorPrompt } from "../prompts/contest.prompt.js";
 
 const llm = new ChatGroq({
     model: "llama-3.3-70b-versatile",
-    temperature: 0.4, // Slight boost in creativity for unique competitive problems
+    temperature: 0.4,
 });
 
 const prompt = PromptTemplate.fromTemplate(contestGeneratorPrompt);

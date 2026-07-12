@@ -1,4 +1,3 @@
-// src/controllers/contest.controller.js
 import { generateContestService } from '../services/contest.service.js';
 import { Contest } from '../models/contest.model.js';
 import { activeLeaderboards } from '../sockets/contest.socket.js';
@@ -185,7 +184,6 @@ export const startContest = async (req, res) => {
             return res.status(400).json({ success: false, message: "Contest already active." });
         }
 
-        // 2 minutes per question configuration
         const totalDurationSeconds = contest.questions.length * 120; 
 
         contest.status = 'active';

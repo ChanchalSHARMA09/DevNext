@@ -1,10 +1,8 @@
-// src/services/auth.service.js
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { User } from '../models/user.model.js';
 import { sendEmail } from '../utils/email.util.js';
 
-// Helper: Generate Access and Refresh Tokens
 const generateAccessAndRefreshTokens = async (userId) => {
     try {
         const accessToken = jwt.sign({ id: userId }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1m' });
@@ -16,14 +14,12 @@ const generateAccessAndRefreshTokens = async (userId) => {
     }
 };
 
-// Helper: Generate a random hashed token for email workflows
 const generateEmailToken = () => {
     const rawToken = crypto.randomBytes(20).toString('hex');
     const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
     return { rawToken, hashedToken };
 };
 
-// 1. REGISTER SERVICE (Updated to require email verification)
 export const registerUserService = async ({ username, email, password }, origin) => {
     if (!username || !email || !password) {
         const error = new Error("Please provide username, email, and password.");
@@ -38,16 +34,13 @@ export const registerUserService = async ({ username, email, password }, origin)
         email, 
         password,
         verificationToken: hashedToken,
-        verificationTokenExpire: Date.now() + 24 * 60 * 60 * 1000 // 24 hours
+        verificationTokenExpire: Date.now() + 24 * 60 * 60 * 1000
     });
 
-    // Send verification email
     const verifyUrl = `${origin}/verify-email/${rawToken}`;
     
-    // Fallback plain text string
     const message = `Please verify your email by clicking the link: \n\n ${verifyUrl}`;
     
-    // 🔥 NEW: Beautiful HTML format that turns it into a clickable button and text link
     const htmlMessage = `
         <div style="font-family: sans-serif; padding: 20px; color: #333;">
             <h2>Welcome to DevNext Arena!</h2>
@@ -69,18 +62,15 @@ export const registerUserService = async ({ username, email, password }, origin)
         });
     } catch (err) {
         console.log(err);
-        // 🔥 ROLLBACK: Delete the newly created user so the username/email is instantly freed up
         await User.findByIdAndDelete(user._id);
         const error = new Error("Registration failed because the verification email could not be sent. Please try again later.");
-        error.statusCode = 500; // Internal Server Error (usually means SMTP issues)
+        error.statusCode = 500;
         throw error;
     }
 
-    // Notice: We no longer return JWTs here. The user must verify first.
     return { user };
 };
 
-// 2. LOGIN SERVICE (Updated to enforce verification)
 export const loginUserService = async ({ email, password }) => {
     if (!email || !password) {
         const error = new Error("Please provide a valid email and password string.");
@@ -106,7 +96,6 @@ export const loginUserService = async ({ email, password }) => {
     return { user, accessToken, refreshToken };
 };
 
-// 3. VERIFY EMAIL SERVICE (NEW)
 export const verifyEmailService = async (token) => {
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
@@ -129,7 +118,6 @@ export const verifyEmailService = async (token) => {
     return true;
 };
 
-// 4. FORGOT PASSWORD SERVICE (NEW)
 export const forgotPasswordService = async (email, origin) => {
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
@@ -162,7 +150,6 @@ export const forgotPasswordService = async (email, origin) => {
     }
 };
 
-// 5. RESET PASSWORD SERVICE (NEW)
 export const resetPasswordService = async (token, newPassword) => {
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
@@ -182,11 +169,9 @@ export const resetPasswordService = async (token, newPassword) => {
     user.resetPasswordExpire = undefined;
     await user.save();
 
-    // Log them in immediately after reset
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
     return { user, accessToken, refreshToken };
 };
 
-// 6. REFRESH & LOGOUT SERVICES (Remain unchanged)
 export const refreshUserTokenService = async (incomingRefreshToken) => { /* ... existing logic ... */ };
 export const logoutUserService = async (userId) => { /* ... existing logic ... */ };

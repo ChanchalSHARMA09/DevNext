@@ -6,14 +6,13 @@ import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 export default function VerifyEmail() {
     const { token } = useParams();
     const navigate = useNavigate();
-    const [status, setStatus] = useState('loading'); // loading, success, error
+    const [status, setStatus] = useState('loading');
     const [message, setMessage] = useState('Verifying your email...');
-    const initialized = useRef(false); // 🔥 Tracks whether the API call has fired
+    const initialized = useRef(false);
 
     useEffect(() => {
-        // Only proceed if this effect hasn't executed yet
         if (!initialized.current) {
-            initialized.current = true; // Lock it down immediately so the second mount is ignored
+            initialized.current = true;
 
             const verify = async () => {
                 try {

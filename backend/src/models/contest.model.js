@@ -1,4 +1,3 @@
-// src/models/contest.model.js
 import mongoose from 'mongoose';
 
 const ContestSchema = new mongoose.Schema({
@@ -8,8 +7,7 @@ const ContestSchema = new mongoose.Schema({
     hostId: { type: String, default: "Host_Admin" },
     status: { type: String, enum: ['waiting', 'active', 'completed'], default: 'waiting' },
     
-    // NEW: Timing & Expiration Fields
-    durationSeconds: { type: Number, default: 300 }, // Default 5 minutes (300s)
+    durationSeconds: { type: Number, default: 300 },
     startTime: { type: Date, default: null },
     endTime: { type: Date, default: null },
 

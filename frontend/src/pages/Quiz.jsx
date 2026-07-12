@@ -1,4 +1,3 @@
-// src/pages/Quiz.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
@@ -8,14 +7,11 @@ export default function Quiz() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Grab the pre-loaded quiz data sent from the Dashboard!
     const [activeQuiz, setActiveQuiz] = useState(location.state?.generatedQuiz || null);
-    
     const [quizAnswers, setQuizAnswers] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [quizResult, setQuizResult] = useState(null);
 
-    // Security Gatekeeper: If someone tries to access /quiz directly via URL without generating one, kick them back.
     useEffect(() => {
         if (!activeQuiz) {
             navigate('/dashboard');
@@ -23,7 +19,7 @@ export default function Quiz() {
     }, [activeQuiz, navigate]);
 
     const handleSelectOption = (questionId, optionText) => {
-        if (quizResult) return; // Freeze selections once graded
+        if (quizResult) return; 
         setQuizAnswers(prev => ({ ...prev, [questionId]: optionText }));
     };
 
@@ -36,13 +32,11 @@ export default function Quiz() {
 
         setIsSubmitting(true);
         try {
-            // Reformat dictionary state to match backend array layer input schema
             const formattedAnswers = Object.entries(quizAnswers).map(([qId, option]) => ({
                 questionId: Number(qId),
                 selectedOption: option
             }));
 
-            // Send answers to your grading controller
             const response = await api.post('/quiz/submit', {
                 quizId: activeQuiz._id,
                 answers: formattedAnswers
@@ -59,7 +53,6 @@ export default function Quiz() {
         }
     };
 
-    // Prevent rendering errors if kicked back to dashboard
     if (!activeQuiz) return null;
 
     return (

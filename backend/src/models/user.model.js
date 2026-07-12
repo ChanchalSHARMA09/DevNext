@@ -1,4 +1,3 @@
-// src/models/user.model.js
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
@@ -20,7 +19,7 @@ const UserSchema = new mongoose.Schema({
         type: String, 
         required: [true, "Password is required"], 
         minlength: 6,
-        select: false // Crucial: Prevents returning password hash in standard DB queries!
+        select: false
     },
     avatar: { 
         type: String, 
@@ -28,10 +27,9 @@ const UserSchema = new mongoose.Schema({
     },
     refreshToken: {
         type: String,
-        select: false // Keep it hidden from general database queries!
+        select: false
     },
     
-    // 🔥 NEW: Fields for Email Verification
     isEmailVerified: {
         type: Boolean,
         default: false
@@ -39,21 +37,18 @@ const UserSchema = new mongoose.Schema({
     verificationToken: String,
     verificationTokenExpire: Date,
 
-    // 🔥 NEW: Fields for Password Reset
     resetPasswordToken: String,
     resetPasswordExpire: Date,
 
     createdAt: { type: Date, default: Date.now }
 });
 
-// Automatically hash password before saving a new or updated user
 UserSchema.pre('save', async function() {
-    if (!this.isModified('password')) return; // No next() needed here!
+    if (!this.isModified('password')) return;
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Helper method to compare typed password with the stored hash
 UserSchema.methods.comparePassword = async function(candidatePassword) {
     return await bcrypt.compare(candidatePassword, this.password);
 };

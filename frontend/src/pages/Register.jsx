@@ -1,4 +1,3 @@
-// src/pages/Register.jsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -30,7 +29,6 @@ export default function Register() {
         }
     };
 
-    // 🔥 NEW: Success Screen when email verification is sent
     if (isSubmitted) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-slate-950 p-4">

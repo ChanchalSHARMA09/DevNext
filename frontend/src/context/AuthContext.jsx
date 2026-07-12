@@ -1,4 +1,3 @@
-// src/context/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../services/api';
 import { socket } from '../services/socket';
@@ -9,11 +8,9 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [socket, setSocket] = useState(null); // Expose socket via context so Lobby/Arena can use it!
+    const [socket, setSocket] = useState(null);
 
-    // Helper: Safely instantiate and connect a persistent Socket connection
     const connectSocket = (token) => {
-        // If a socket already exists, disconnect it before spinning up a new one
         if (socket) {
             socket.disconnect();
         }
@@ -21,7 +18,7 @@ export const AuthProvider = ({ children }) => {
         const newSocket = io('http://localhost:5000', {
             withCredentials: true,
             auth: {
-                token: token // Strictly satisfies your protectSocket backend guard
+                token: token
             },
             transports: ['websocket', 'polling']
         });
@@ -34,18 +31,15 @@ export const AuthProvider = ({ children }) => {
         return newSocket;
     };
 
-    // 1. Check if user is already logged in on initial page load
     useEffect(() => {
         const checkLoggedInUser = async () => {
             const token = localStorage.getItem('accessToken');
 
-            // Removed '&& user' so page refreshes actually restore your session!
             if (token && token !== 'undefined' && token !== 'null') {
                 try {
                     const response = await api.get('/auth/me');
                     setUser(response.data.user);
                     
-                    // Successfully restored user session -> spin up their WebSocket
                     connectSocket(token);
                 } catch (error) {
                     console.error("Session expired or invalid:", error);
@@ -58,7 +52,6 @@ export const AuthProvider = ({ children }) => {
 
         checkLoggedInUser();
 
-        // Cleanup: Disconnect socket when the app completely unmounts
         return () => {
             if (socket) {
                 socket.disconnect();
@@ -66,28 +59,21 @@ export const AuthProvider = ({ children }) => {
         };
     }, []);
 
-    // 2. Register Function
     const register = async (username, email, password) => {
-        // 1. Make the API call to create the account and trigger the verification email
         const response = await api.post('/auth/register', { username, email, password });
-        
-        // 2. We DO NOT log them in, set localStorage, or connect sockets here anymore. 
-        // They must verify their email first, then log in normally.
         return response.data;
     };
 
-    // 3. Login Function
     const login = async (email, password) => {
         const response = await api.post('/auth/login', { email, password });
         const { accessToken, user: loggedInUser } = response.data;
         
         localStorage.setItem('accessToken', accessToken);
         setUser(loggedInUser);
-        connectSocket(accessToken); // Spin up authenticated socket
+        connectSocket(accessToken);
         return loggedInUser;
     };
 
-    // 4. Logout Function
     const logout = async () => {
         try {
             await api.post('/auth/logout');
@@ -96,7 +82,6 @@ export const AuthProvider = ({ children }) => {
         } finally {
             localStorage.removeItem('accessToken');
             
-            // Sever WebSocket connection immediately and clear state
             if (socket) {
                 socket.disconnect();
                 setSocket(null);
@@ -109,7 +94,7 @@ export const AuthProvider = ({ children }) => {
         <AuthContext.Provider value={{ 
             user, 
             loading, 
-            socket, // Now your Lobby.jsx can grab 'socket' directly from useAuth()!
+            socket,
             login, 
             register, 
             logout, 
@@ -120,7 +105,6 @@ export const AuthProvider = ({ children }) => {
     );
 };
 
-// Custom Hook for clean imports: const { user, login } = useAuth();
 export const useAuth = () => {
     return useContext(AuthContext);
 };

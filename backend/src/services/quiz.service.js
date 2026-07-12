@@ -1,11 +1,10 @@
-// src/services/quiz.service.js
 import { ChatGroq } from "@langchain/groq";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { quizGeneratorPrompt } from "../prompts/quiz.prompt.js";
 
 const llm = new ChatGroq({
     model: "llama-3.3-70b-versatile",
-    temperature: 0.3, // Slightly higher temperature for creative quiz questions
+    temperature: 0.3,
 });
 
 const prompt = PromptTemplate.fromTemplate(quizGeneratorPrompt);

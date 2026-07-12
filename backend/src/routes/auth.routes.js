@@ -1,4 +1,3 @@
-// src/routes/auth.routes.js
 import express from 'express';
 import { 
     register, 
@@ -17,7 +16,6 @@ const router = express.Router();
 router.post('/register', register);
 router.post('/login', login);
 
-// New Verification & Reset Routes
 router.get('/verify-email/:token', verifyEmail);
 router.post('/forgot-password', forgotPassword);
 router.put('/reset-password/:token', resetPassword);

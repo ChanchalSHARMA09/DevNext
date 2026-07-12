@@ -1,5 +1,3 @@
-// src/prompts/contest.prompt.js
-
 export const contestGeneratorPrompt = `
 You are a High-Stakes Competitive Programming Tournament Master.
 Generate a challenging, 5-question coding arena contest for developers on the following concept in {language}:

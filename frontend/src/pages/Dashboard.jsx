@@ -1,4 +1,3 @@
-// src/pages/Dashboard.jsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -29,15 +28,10 @@ export default function Dashboard() {
     const [error, setError] = useState('');
     const [language, setLanguage] = useState('javascript');
     const [difficulty, setDifficulty] = useState('Medium');
-
-    // Telemetry Progress Metrics States
     const [metrics, setMetrics] = useState(null);
     const [loadingMetrics, setLoadingMetrics] = useState(true);
-
-    // Adaptive Quiz Loading State
     const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
 
-    // 1. Fetch Progress Report Metrics on Component Mount
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
@@ -56,7 +50,6 @@ export default function Dashboard() {
         fetchDashboardData();
     }, []);
 
-    // 2. Create a New Contest Room
     const handleCreateRoom = async () => {
         setIsCreating(true);
         setError('');
@@ -84,27 +77,23 @@ export default function Dashboard() {
         }
     };
 
-    // 3. Join Existing Room by Code
     const handleJoinRoom = (e) => {
         e.preventDefault();
         if (!joinCode.trim()) return;
         navigate(`/lobby/${joinCode.trim()}`);
     };
 
-    // 4. Generate Weakness Quiz and Pass Data to Route
     const handleLaunchAdaptiveQuiz = async () => {
         setIsGeneratingQuiz(true);
         setError('');
     
         try {
-            // Targets POST /api/v1/quiz/generate (Empty strings trigger weakness auto-detection)
             const response = await api.post('/quiz/generate', {
                 topic: '',
                 language: ''
             });
     
             if (response.data?.success) {
-                // Navigate to the frontend /quiz page AND pass the data instantly!
                 navigate('/quiz', { state: { generatedQuiz: response.data.data } });
             }
         } catch (err) {
@@ -114,7 +103,6 @@ export default function Dashboard() {
         }
     };
 
-    // Score styling helper for history logs
     const getScoreBadgeColor = (score) => {
         if (score >= 80) return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
         if (score >= 50) return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
@@ -241,7 +229,7 @@ export default function Dashboard() {
                         </button>
                     </div>
 
-                    {/* 🔥 Card 4: Dedicated Quiz Router Link Anchor */}
+                    {/* Card 4: Dedicated Quiz Router Link Anchor */}
                     <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/50 p-6 flex flex-col justify-between shadow-xl group hover:border-amber-500/20 transition-all duration-300">
                         <div className="absolute -right-6 -top-6 h-32 w-32 rounded-full bg-amber-500/10 blur-3xl pointer-events-none"></div>
                         <div>

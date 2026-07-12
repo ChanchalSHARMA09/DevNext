@@ -1,4 +1,3 @@
-// src/pages/Arena.jsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -10,21 +9,17 @@ export default function Arena() {
     const { roomId } = useParams();
     const { user } = useAuth();
     const navigate = useNavigate();
-
+    
     const [contest, setContest] = useState(null);
     const [leaderboard, setLeaderboard] = useState([]);
     const [timeLeft, setTimeLeft] = useState(0);
-    
     const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
     const [selectedOption, setSelectedOption] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [feedback, setFeedback] = useState(null);
-    
-    // 🔥 New state to toggle between active quiz or final scorecard screen
     const [showResults, setShowResults] = useState(false);
 
     useEffect(() => {
-        // 🔥 CRITICAL REFRESH GUARD: Wait until Auth Context restores the user session!
         if (!user || (!user.id && !user._id)) return;
 
         const fetchArenaData = async () => {
@@ -48,7 +43,6 @@ export default function Arena() {
                 
                 if (!socket.connected) socket.connect();
 
-                // Signal active connection recovery using immutable user identity
                 socket.emit('joinRoom', { 
                     roomId, 
                     userId: user.id || user._id, 
@@ -71,7 +65,6 @@ export default function Arena() {
         socket.on('contestEnded', ({ finalLeaderboard }) => {
             setFeedback({ message: '🚨 Contest time expired! Submissions locked.' });
             if (finalLeaderboard) setLeaderboard(finalLeaderboard);
-            // 🔥 REDIRECT TRIGGER: Host stopped match or duration lapsed on server
             setShowResults(true);
         });
 
@@ -81,13 +74,11 @@ export default function Arena() {
         };
     }, [roomId, user, navigate]);
 
-    // Clock Decrementer
     useEffect(() => {
         if (timeLeft <= 0) return;
         const timer = setInterval(() => {
             setTimeLeft(prev => {
                 if (prev <= 1) {
-                    // 🔥 REDIRECT TRIGGER: Local countdown timer hit zero
                     setShowResults(true);
                     return 0;
                 }
@@ -144,12 +135,10 @@ export default function Arena() {
             setSelectedOption(null);
             setFeedback(null);
         } else {
-            // 🔥 REDIRECT TRIGGER: User clicks finish on final question card
             setShowResults(true); 
         }
     };
 
-    // Render global loading panel until user credentials and contest configurations load
     if (!user || !contest) {
         return (
             <div className="flex h-screen w-screen items-center justify-center bg-slate-950 text-slate-400">
@@ -158,9 +147,6 @@ export default function Arena() {
         );
     }
 
-    // ==========================================
-    // 📊 CONDITIONAL RETURN: FINAL SCORECARD SCREEN
-    // ==========================================
     if (showResults) {
         const myPerformance = leaderboard.find(p => p.userId === (user?.id || user?._id));
         const finalScore = myPerformance?.score || 0;
@@ -222,9 +208,6 @@ export default function Arena() {
         );
     }
 
-    // ==========================================
-    // 🕹️ CORE UI: ACTIVE MATCH ARENA VIEW
-    // ==========================================
     return (
         <div className="flex h-screen w-screen flex-col bg-slate-950 text-slate-100 overflow-hidden">
             {/* Top Match Bar */}

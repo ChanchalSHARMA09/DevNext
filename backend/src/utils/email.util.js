@@ -1,9 +1,3 @@
-// src/utils/email.util.js
-
-/**
- * Sends an email using the Brevo HTTP REST API.
- * Maps classic Nodemailer arguments (to, subject, html) into Brevo API payload layout.
- */
 export const sendEmail = async (options) => {
     const apiKey = process.env.BREVO_API_KEY;
     const senderEmail = process.env.SENDER_EMAIL;
@@ -23,7 +17,6 @@ export const sendEmail = async (options) => {
         throw new Error("Recipient email is missing.");
     }
 
-    // Build the payload required by Brevo's V3 API
     const payload = {
         sender: { 
             name: "DevNext Support", 

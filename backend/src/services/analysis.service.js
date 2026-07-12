@@ -2,7 +2,6 @@ import { ChatGroq } from "@langchain/groq";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { codeAnalysisPrompt } from "../prompts/analysis.prompt.js";
 
-// Initialize the free Groq LLM running Llama 3.3 70B
 const llm = new ChatGroq({
     model: "llama-3.3-70b-versatile",
     temperature: 0.2,

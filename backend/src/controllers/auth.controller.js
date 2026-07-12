@@ -1,4 +1,3 @@
-// src/controllers/auth.controller.js
 import { 
     registerUserService, 
     loginUserService, 
@@ -9,17 +8,14 @@ import {
     resetPasswordService
 } from '../services/auth.service.js';
 
-// 🔥 Dynamic environment detection
 const isProduction = process.env.NODE_ENV === 'production' || !!process.env.FRONTEND_URL;
 
-// Helper: Format and send HTTP response along with secure HTTP-Only Cookie
 const sendTokenResponse = ({ user, accessToken, refreshToken }, statusCode, res, message) => {
     const cookieOptions = {
         httpOnly: true,
-        // 🔥 CRITICAL CHANGES FOR CROSS-DOMAIN PRODUCTION:
-        secure: isProduction, // Must be true on Render (HTTPS)
-        sameSite: isProduction ? 'none' : 'lax', // 'none' allows Vercel to read it, 'lax' for local dev
-        maxAge: 2 * 24 * 60 * 60 * 1000 // 2 Days in milliseconds
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
+        maxAge: 2 * 24 * 60 * 60 * 1000
     };
 
     return res.status(statusCode)
@@ -38,7 +34,6 @@ const sendTokenResponse = ({ user, accessToken, refreshToken }, statusCode, res,
        });
 };
 
-// 1. REGISTER USER
 export const register = async (req, res) => {
     try {
         const origin = req.get('origin') || 'http://localhost:5173';
@@ -69,7 +64,6 @@ export const register = async (req, res) => {
     }
 };
 
-// 2. LOGIN USER
 export const login = async (req, res) => {
     try {
         const result = await loginUserService(req.body);
@@ -85,7 +79,6 @@ export const login = async (req, res) => {
     }
 };
 
-// 3. VERIFY EMAIL
 export const verifyEmail = async (req, res) => {
     try {
         await verifyEmailService(req.params.token);
@@ -95,7 +88,6 @@ export const verifyEmail = async (req, res) => {
     }
 };
 
-// 4. FORGOT PASSWORD
 export const forgotPassword = async (req, res) => {
     try {
         const origin = req.get('origin') || `http://${req.headers.host}`;
@@ -106,7 +98,6 @@ export const forgotPassword = async (req, res) => {
     }
 };
 
-// 5. RESET PASSWORD
 export const resetPassword = async (req, res) => {
     try {
         const result = await resetPasswordService(req.params.token, req.body.password);
@@ -116,7 +107,6 @@ export const resetPassword = async (req, res) => {
     }
 };
 
-// 6. REFRESH ACCESS TOKEN
 export const refreshAccessToken = async (req, res) => {
     try {
         const incomingRefreshToken = req.cookies?.refreshToken || req.body.refreshToken;
@@ -130,7 +120,6 @@ export const refreshAccessToken = async (req, res) => {
     }
 };
 
-// 7. LOGOUT USER
 export const logout = async (req, res) => {
     try {
         await logoutUserService(req.user._id);
@@ -147,7 +136,6 @@ export const logout = async (req, res) => {
     }
 };
 
-// 8. GET CURRENT LOGGED IN USER
 export const getMe = async (req, res) => {
     return res.status(200).json({ success: true, user: req.user });
 };

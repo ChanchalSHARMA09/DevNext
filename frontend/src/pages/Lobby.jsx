@@ -1,4 +1,3 @@
-// src/pages/Lobby.jsx
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -17,14 +16,11 @@ export default function Lobby() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    // 1. Fetch initial room details and connect WebSocket
     useEffect(() => {
-        // Safety guard: Don't execute if the socket or user context isn't ready yet
         if (!socket || !user) return;
 
         const fetchRoomData = async () => {
             try {
-                // 1. Fetch initial room state via REST
                 const response = await api.get(`/contest/room/${roomId}`); 
                 
                 const contestData = response.data.data || response.data.contest || response.data;
@@ -34,7 +30,6 @@ export default function Lobby() {
                 setParticipants(initialParticipants);
                 setLoading(false);
 
-                // 2. Prepare the room join payload
                 const joinPayload = { 
                     roomId, 
                     userId: user.id || user._id, 
@@ -42,26 +37,19 @@ export default function Lobby() {
                     avatar: user.avatar 
                 };
 
-                // Helper: Emits joinRoom safely only when the transport is open
                 const performJoin = () => {
                     console.log("Socket connected cleanly! Emitting joinRoom:", joinPayload);
                     socket.emit('joinRoom', joinPayload);
                 };
 
-                // 3. Bulletproof Socket Handshake Strategy
                 if (socket.connected) {
-                    // If socket is already up and authenticated, join instantly
                     performJoin();
                 } else {
-                    // Attach freshest token just in case it refreshed during API call
                     const token = localStorage.getItem('accessToken');
                     if (token) {
                         socket.auth = { token };
                     }
-                    
                     socket.connect();
-                    
-                    // CRITICAL: Queue emit to fire the exact millisecond handshake succeeds!
                     socket.once('connect', performJoin);
                 }
             } catch (err) {
@@ -72,16 +60,13 @@ export default function Lobby() {
 
         fetchRoomData();
 
-        // 4. Real-time WebSocket Listeners (Kept exactly as you wrote them!)
         socket.on('leaderboardUpdate', (fullPlayerList) => {
-            // Map the backend's 'userId' to '_id' so it perfectly matches your UI's expected variables
             const synchronizedList = fullPlayerList.map(player => ({
                 _id: player.userId,
                 username: player.username,
                 avatar: player.avatar
             }));
 
-            // Instantly overwrite the local state with the server's master list
             setParticipants(synchronizedList);
         });
 
@@ -94,9 +79,7 @@ export default function Lobby() {
             navigate(`/arena/${roomId}`);
         });
 
-        // 5. Cleanup: Leave room and strip listeners safely when unmounting
         return () => {
-            // Remove the one-time connect listener if component unmounts mid-handshake
             socket.off('connect');
             
             socket.emit('leaveRoom', { roomId, userId: user?.id || user?._id });
@@ -106,20 +89,15 @@ export default function Lobby() {
         };
     }, [roomId, user, socket, navigate]);
 
-    // Copy Room ID to clipboard
     const copyRoomId = () => {
         navigator.clipboard.writeText(roomId);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
 
-    // Host triggers contest start
     const handleStartContest = async () => {
         try {
-            // Pass { roomId } inside the body object so req.body.roomId exists on the backend!
             await api.post(`/contest/start`, { roomId });
-            
-            // Emit socket event to navigate all waiting participants to the Arena
             socket.emit('startContest', { roomId });
         } catch (err) {
             alert(err.response?.data?.message || 'Failed to start the match.');
@@ -150,20 +128,11 @@ export default function Lobby() {
         );
     }
 
-    // Safely extract IDs as Strings
     const currentUserId = String(user?.id || user?._id);
     
-    // Look specifically for hostId now!
     const roomHostId = String(contest?.hostId);
     
     const isHost = Boolean(currentUserId && roomHostId && currentUserId === roomHostId);
-
-    // console.log("--- HOST DEBUGGER ---", {
-    // "Logged-In User Object": user,
-    // "Extracted Current User ID": user?._id || user?.id,
-    // "Fetched Contest Object": contest,
-    // "Extracted Room Host ID": contest?.hostId || contest?.host
-    // });
 
     return (
         <div className="min-h-screen bg-slate-950 p-6 md:p-12 text-slate-100">

@@ -1,4 +1,3 @@
-// src/pages/ResetPassword.jsx
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -7,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 export default function ResetPassword() {
     const { token } = useParams();
     const navigate = useNavigate();
-    const { login } = useAuth(); // If you want to manually set state, or just let them log in
+    const { login } = useAuth();
     
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -25,12 +24,9 @@ export default function ResetPassword() {
         setError('');
 
         try {
-            // Your backend logs the user in automatically on successful reset and returns a token!
             const response = await api.put(`/auth/reset-password/${token}`, { password });
-            
-            // Save token and go to dashboard
             localStorage.setItem('accessToken', response.data.accessToken);
-            window.location.href = '/dashboard'; // Force reload to sync auth context
+            window.location.href = '/dashboard';
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to reset password.');
             setIsLoading(false);

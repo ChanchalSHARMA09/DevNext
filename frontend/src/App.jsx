@@ -1,4 +1,3 @@
-// src/App.jsx
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Login from './pages/Login';
@@ -12,13 +11,11 @@ import Quiz from './pages/Quiz';
 import Lobby from './pages/Lobby';
 import Arena from './pages/Arena';
 
-// Guard: Blocks unauthenticated users
 const ProtectedRoute = ({ children }) => {
     const { isAuthenticated } = useAuth();
     return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
-// Guard: Redirects authenticated users away from login/register
 const PublicRoute = ({ children }) => {
     const { isAuthenticated } = useAuth();
     return isAuthenticated ? <Navigate to="/dashboard" replace /> : children;

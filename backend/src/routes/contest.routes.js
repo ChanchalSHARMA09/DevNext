@@ -1,4 +1,3 @@
-// src/routes/contest.routes.js
 import express from 'express';
 import { createContestRoom, getContestRoom, submitContestAnswer, startContest } from '../controllers/contest.controller.js';
 import { protectRoute } from '../middlewares/auth.middleware.js';

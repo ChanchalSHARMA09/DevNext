@@ -1,4 +1,3 @@
-// src/server.js
 import dns from 'dns';
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 
@@ -25,15 +24,13 @@ const PORT = process.env.PORT || 5000;
 
 connectDB();
 
-// 🔥 1. Define your Allowed Origins (Local dev + Vercel Production)
 const allowedOrigins = [
     'http://localhost:5173', 
-    process.env.FRONTEND_URL // e.g., 'https://your-vercel-app.vercel.app'
+    process.env.FRONTEND_URL
 ];
 
 const httpServer = http.createServer(app);
 
-// 🔥 2. Apply Dynamic CORS to Socket.io
 const io = new Server(httpServer, {
     cors: {
         origin: allowedOrigins,
@@ -44,13 +41,10 @@ const io = new Server(httpServer, {
 
 app.set('io', io);
 
-// 🔥 3. Apply Dynamic CORS to Express HTTP Routes
 app.use(cors({
     origin: (origin, callback) => {
-        // Allow requests with no origin (like mobile apps or postman)
         if (!origin) return callback(null, true);
         
-        // Check if origin is in our allowed array, OR if it's a Vercel preview branch URL
         if (allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin)) {
             callback(null, true);
         } else {

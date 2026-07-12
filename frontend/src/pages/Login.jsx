@@ -1,4 +1,3 @@
-// src/pages/Login.jsx
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -20,7 +19,7 @@ export default function Login() {
 
         try {
             await login(email, password);
-            navigate('/dashboard'); // Jump to dashboard on success
+            navigate('/dashboard');
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to sign in. Please try again.');
         } finally {
@@ -62,7 +61,7 @@ export default function Login() {
                     </div>
 
                     <div>
-                        {/* 🔥 Added flex container to align Label and Forgot Password link */}
+                        {/* Flex container to align Label and Forgot Password link */}
                         <div className="mb-1.5 flex items-center justify-between">
                             <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">
                                 Password

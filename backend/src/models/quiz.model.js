@@ -1,7 +1,5 @@
-// src/models/quiz.model.js
 import mongoose from 'mongoose';
 
-// Blueprint for saving generated quizzes
 const QuizSchema = new mongoose.Schema({
     userId: { type: String, default: "anonymous_developer" },
     topic: { type: String, required: true },
@@ -16,12 +14,11 @@ const QuizSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
-// Blueprint for saving completed quiz attempts & grades
 const QuizAttemptSchema = new mongoose.Schema({
     userId: { type: String, default: "anonymous_developer" },
     quizId: { type: mongoose.Schema.Types.ObjectId, ref: 'Quiz', required: true },
     topic: { type: String, required: true },
-    score: { type: Number, required: true }, // Percentage out of 100
+    score: { type: Number, required: true },
     passed: { type: Boolean, required: true },
     userAnswers: [{
         questionId: { type: Number },
